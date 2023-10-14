@@ -1,0 +1,94 @@
+unit UStart;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Imaging.pngimage;
+
+type
+  TStart = class(TForm)
+    BStart: TButton;
+    BExit: TButton;
+    DiffRadioGroup: TRadioGroup;
+    StartTitleImage: TImage;
+    BLoad: TButton;
+    SaveComboBox: TComboBox;
+    procedure BStartClick(Sender: TObject);
+    procedure BExitClick(Sender: TObject);
+    procedure DiffRadioGroupClick(Sender: TObject);
+    procedure SaveComboBoxSelect(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure BLoadClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Start: TStart;
+  FName: string;
+
+implementation
+
+{$R *.dfm}
+
+uses UGame, UInv, UStats;
+
+procedure TStart.BExitClick(Sender: TObject);
+begin
+ Application.Terminate;
+end;
+
+procedure TStart.BLoadClick(Sender: TObject);
+begin
+ FName := SaveComboBox.Items[SaveComboBox.Itemindex];
+ Application.CreateForm(TGame, Game);
+ Application.CreateForm(TInventory, Inventory);
+ Application.CreateForm(TStats, Stats);
+ Game.show;
+ Start.hide;
+end;
+
+procedure TStart.BStartClick(Sender: TObject);
+begin
+ FName := 'OriginalMap.txt';
+ Application.CreateForm(TGame, Game);
+ Application.CreateForm(TInventory, Inventory);
+ Application.CreateForm(TStats, Stats);
+ Game.show;
+ Start.hide;
+end;
+
+procedure TStart.DiffRadioGroupClick(Sender: TObject);
+begin
+ BStart.Enabled := True;
+end;
+
+
+procedure TStart.FormShow(Sender: TObject);
+var k: integer;
+var  sr: TSearchRec;
+bmp: TBitmap;
+begin
+ Game.SpriteImageList.GetBitmap(0,bmp);
+ //for var i: integer := 0 to High do
+
+ Canvas.Draw(0,0,bmp);
+ SaveComboBox.Items.Clear;
+ k := 0;
+ if FindFirst(ExtractFilePath(Application.ExeName)+'Saves/Save_*.txt', faAnyFile, sr)=0  then  //ищем  файлы Word  в каталоге
+  repeat
+   SaveComboBox.Items.Add(sr.Name); //выводим список в ComboBox
+  until FindNext(sr)<>0;
+  FindClose(sr);
+end;
+
+procedure TStart.SaveComboBoxSelect(Sender: TObject);
+begin
+ BLoad.Enabled := True;
+end;
+
+end.

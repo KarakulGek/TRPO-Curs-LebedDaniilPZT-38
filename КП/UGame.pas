@@ -1,0 +1,376 @@
+unit UGame;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Menus, Grids, System.ImageList,
+  Vcl.ImgList, Vcl.StdCtrls, mmsystem, ShellAPI;
+
+type
+//В этой форме происходит модификация класса StringGrid
+  TStringGrid = class(Grids.TStringGrid)
+  private
+    FImageList: TImageList;
+  protected
+   procedure KeyPress(var Key: Char); override;
+   procedure DrawCell(ACol, ARow: Integer; ARect: TRect; AState: TGridDrawState); override;
+   procedure Loaded; override;
+  end;
+
+type
+  TGame = class(TForm)
+    GameMainMenu: TMainMenu;
+    N1: TMenuItem;
+    N2: TMenuItem;
+    SpriteImageList: TImageList;
+    SMap: TStringGrid;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCreate(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure N4Click(Sender: TObject);
+  private
+  public
+  end;
+
+ type
+ //Описание класса игрока
+  Player = class
+  public
+    HP: integer;
+    Dmg: integer;
+    PosX:integer;
+    PosY:integer;
+    constructor Create(HP:integer;Dmg:integer;PosX,PosY:integer);
+    procedure Move(x,y:integer;SMap:TStringGrid);
+  end;
+
+ type
+ //Описание класса противника
+  Enemy = class
+  public
+    HP: integer;
+    PosX:integer;
+    PosY:integer;
+    kind:string;
+    dmg:integer;
+    constructor Create(HP,dmg:integer;kind:string;PosX,PosY:integer);
+  end;
+
+var
+  Game: TGame;
+  EMap: array of array of Enemy; //Карта врагов. Ячейки в ней либо пустые, либо содержат объект класса противника. Карта нужна для удобной записи и хранения всех врагов
+  p: Player;
+  epx: integer;
+  epy: integer;
+  DiffMod: byte;  //Модификатор сложности, влияющий на здоровье и урон врагов, а так же на скорость мини-игр
+  Points: Cardinal; //Очки, необходимые для победы, которые даются за получение предметов и победу над врагами
+
+implementation
+
+{$R *.dfm}
+
+uses UStart,UInv, UOrkB, UShroomB, USnakeB, UStats;
+
+procedure TGame.FormClose(Sender: TObject; var Action: TCloseAction);
+//При закрытии формы открывает стартовое меню
+begin
+ Start.show;
+end;
+
+constructor Player.Create(HP:integer;Dmg:integer;PosX,PosY:integer);
+//Конструктор класса игрока
+begin
+ Self.HP := HP;
+ Self.Dmg := Dmg;
+ Self.PosX := Posx;
+ Self.PosY := PosY;
+end;
+
+constructor Enemy.Create(HP,dmg:integer;kind:string;PosX,PosY:integer);
+//Конструктор класса противника
+begin
+ Self.HP := Hp;
+ Self.PosX := Posx;
+ Self.PosY := PosY;
+ Self.kind := kind;
+ Self.dmg := dmg;
+end;
+
+procedure Player.Move(x,y:integer;SMap:TStringGrid);
+//Процедура движения игрока
+const r = 7;
+var i,k:byte;
+begin
+ if ((self.PosX + x) < 0) or ((self.PosY + y) < 0) or ((self.PosX + x) > SMap.ColCount - 1) or ((self.PosY + y) > SMap.RowCount - 1) then Exit;   //Проверяет, не пытается ли игрок выйти за пределы таблицы
+ //Если игрок двигается на клетку пути и там нет противника, то перемещает его
+ if (EMap[self.PosX + x,self.PosY + y] = Nil) and (SMap.Cells[self.PosX + x,self.PosY + y] = '1') then begin
+  self.PosX:= self.PosX + x;
+  self.PosY:= self.PosY + y;
+         //Перемещает положение таблицы так, что бы всегда был виден игрок, направление в каторое он движет и при это не выходило за границы таблицы
+         if ((self.PosX + x*r) >= 0) and ((self.PosY + y*r) >= 0) and ((self.PosX + x*r) <= SMap.ColCount - 1) and ((self.PosY + y*r) <= SMap.RowCount - 1) then begin
+           SMap.Row := self.Posy + y * r;
+           SMap.Col := self.Posx + x * r;
+ end; end
+ //Если игрок двигается на противника, то начинает соответствующий бой, запоминая при этом положение противника
+ else if EMap[self.PosX + x,self.PosY + y] <> Nil then begin
+  if EMap[self.PosX + x,self.PosY + y].kind = 'ork' then begin epx:= self.PosX + x;
+                                                                  epy:= self.PosY + y;
+                                                                  Application.CreateForm(TOrkBattle, OrkBattle);
+                                                                  OrkBattle.showmodal end else
+  if EMap[self.PosX + x,self.PosY + y].kind = 'snake' then begin epx:= self.PosX + x;
+                                                                  epy:= self.PosY + y;
+                                                                  Application.CreateForm(TSnakeBattle, SnakeBattle);
+                                                                  SnakeBattle.showmodal end else
+  if EMap[self.PosX + x,self.PosY + y].kind = 'shroom' then begin epx:= self.PosX + x;
+                                                                  epy:= self.PosY + y;
+                                                                  Application.CreateForm(TShroomBattle, ShroomBattle);
+                                                                  ShroomBattle.showmodal end;
+  end
+  //Если игрок двигается на сундук, то убриет сундук, дает игроку случайный предмет и выводит сообщение
+  else if SMap.Cells[self.PosX + x,self.PosY + y] = '2' then begin
+   SMap.Cells[self.PosX + x,self.PosY + y] := '1';
+   i := random(3);
+   k := 0;
+   PlaySound(pchar(ExtractFilePath(Application.Exename)+'Sounds/GainItem.wav'),1,SND_ASYNC); //Играет звук
+   //Определение, какой предмет получил игрок, добавление его в инвентарь и прибавление к характеристикам
+   if i = 0 then begin
+    for var j:integer := 0 to Inventory.ItemListBox.Items.Count - 1 do
+    //Если игрок подбирает уже второй меч, то не улучшает характеристики игрока
+    if Inventory.ItemListBox.Items[j] = 'Меч' then k:=1;
+    if k = 0 then p.Dmg := p.Dmg + 5;
+    Inventory.ItemListBox.Items.Add('Меч');
+    ShowMessage('Вы нашли меч!'+#13+#10+'Он стоит 150 очков');
+    Points := Points + 150;
+   end
+   else if i = 1 then begin
+    for var j:integer := 0 to Inventory.ItemListBox.Items.Count - 1 do
+    //Если игрок подбирает уже второй амулет, то не улучшает характеристики игрока
+    if Inventory.ItemListBox.Items[j] = 'Амулет' then k:=1;
+    if k = 0 then p.hp := p.hp + 50;
+    Inventory.ItemListBox.Items.Add('Амулет');
+    Points := Points + 100;
+    ShowMessage('Вы нашли амулет!'+#13+#10+'Он стоит 100 очков')
+   end
+   //При подборе зелья характеристики улучшаются каждый раз
+   else if i = 2 then begin
+    p.hp := p.hp + 20;
+    Inventory.ItemListBox.Items.Add('Зелье');
+    Points := Points + 50;
+    ShowMessage('Вы нашли зелье!'+#13+#10+'Он стоит 50 очков');
+   end;
+  end
+  //Если игрок двигается на выход, то выводит сообщение, запрещающее ему выйти если очков не хватает, или заканчивает игру победой если очков хватает
+  else if SMap.Cells[self.PosX + x,self.PosY + y] = '3' then begin
+   if Points < 1000 then ShowMessage('Вы не можете уйти с пустыми руками!'+#13+#10+'Для победы наберите хотя бы 1000 очков')
+   else begin
+     //Играет звук и выводит сообщение победы, показывая количество очков
+     PlaySound(pchar(ExtractFilePath(Application.Exename)+'Sounds/Victory.wav'),1,SND_ASYNC);
+     ShowMessage('Победа!'+#13+#10+'Вы набрали '+IntToStr(Points)+' очков');
+     Game.Close;
+   end;
+  end;
+end;
+
+procedure TGame.FormCreate(Sender: TObject);
+var
+f : textfile;
+a,ik:char;
+c,ec,px,py,eh,ex,ey,ed,ph,pd:Cardinal;
+ek: string;
+//Процедура читает файл оригинальной карты или файл сохранения и берёт карту, характеристики игрока и положения врагов из него
+begin
+ assignfile(f,ExtractFilePath(Application.Exename)+'Saves/'+FName);
+ reset(f);
+ //Если файлом выбирается оригинальная карта, то сложность считывается из стартового меню, иначе она читается из файла
+ if FName = 'OriginalMap.txt' then
+   case Start.DiffRadioGroup.ItemIndex of
+    0: DiffMod:=1;
+    1: DiffMod:=2;
+    2: DiffMod:=3;
+   end
+ else readln(f,DiffMod);
+ //Чтение размера карты
+ read(f,c);
+ SMap.ColCount := c;
+ readln(f,c);
+ SMap.RowCount := c;
+ //Чтение ячеек карты
+ for var i:integer := 0 to SMap.RowCount -1 do begin
+ for var j:integer := 0 to SMap.ColCount -1 do begin
+  read(f, a);
+  SMap.Cells[j,i]:=a;
+ end;
+  readln(f)
+ end;
+ //Чтение характеристик игрока
+ read(f,px);
+ read(f,py);
+ read(f,ph);
+ read(f,pd);
+ readln(f,Points);
+ p := Player.Create(ph,pd,px,py);
+ //Чтение количества врагов и самих врагов, заполняя при этом карту врагов
+ readln(f, ec);
+ SetLength(EMap,SMap.ColCount,SMap.RowCount);
+ if ec > 0 then
+   for var k: integer := 0 to ec - 1 do begin
+    read(f,ex);
+    readln(f,ey);
+    readln(f,ek);
+    ed:=0;
+    eh:=0;
+    //Здоровье и урон врагов задается в зависимости от их типа и сложности
+    if ek = 'shroom' then begin ed := 5 * DiffMod;
+                                eh := 50* DiffMod; end
+    else if ek = 'ork' then begin ed := 5* DiffMod;
+                                  eh := 50* DiffMod; end
+    else if ek = 'snake' then begin ed := 9* DiffMod;
+                                    eh := 30* DiffMod; end;
+    EMap[ex,ey] := Enemy.Create(eh,ed,ek,ex,ey);
+   end;
+ //Читает содержимое инвентаря, если оно присутствует
+ while not Eof(f) do begin
+  read(f,ik);
+  if ik = '0' then Inventory.ItemListBox.Items.Add('Амулет')
+   else if ik = '1' then Inventory.ItemListBox.Items.Add('Меч')
+    else if ik = '2' then Inventory.ItemListBox.Items.Add('Зелье');
+ end;
+ closefile(f);
+end;
+
+procedure TGame.N1Click(Sender: TObject);
+//Открывает инвентарь
+begin
+ Inventory.ShowModal;
+end;
+
+procedure TGame.N2Click(Sender: TObject);
+//Открывает характеристики
+begin
+ Stats.ShowModal;
+end;
+
+procedure TGame.N3Click(Sender: TObject);
+var f: TextFile;
+fk, ec:integer;
+//Сохраняет игру, записывая её в файл Save_*.txt
+begin
+ fk:=0;
+ //Определяет имя сохранения, поочерёдно перебирая номер и проверяя, не занят ли он
+ if not DirectoryExists(ExtractFilePath(Application.Exename)+'Saves') then CreateDir(ExtractFilePath(Application.Exename)+'Saves');
+ Repeat
+  inc(fk)
+ Until not FileExists(ExtractFilePath(Application.Exename)+'Saves/'+'Save_'+inttostr(fk)+'.txt');
+ AssignFile(F,ExtractFilePath(Application.Exename)+'Saves/'+'Save_'+inttostr(fk)+'.txt');
+ //Далее до конца процедуры записываются те же значения, что читает процедура FormCreate
+ Rewrite(f);
+ writeln(f,DiffMod);
+ write(f,SMap.ColCount);
+ write(f,' ');
+ writeln(F,SMap.RowCount);
+ ec := 0;
+ for var i:integer := 0 to SMap.RowCount -1 do begin
+   for var j:integer := 0 to SMap.ColCount -1 do begin
+    write(f,SMap.Cells[j,i]);
+    if EMap[j,i] <> Nil then inc(ec);
+   end;
+  writeln(f)
+ end;
+ write(f,p.PosX);
+ write(f,' ');
+ write(f,p.PosY);
+ write(f,' ');
+ write(f,p.HP);
+ write(f,' ');
+ write(f,p.Dmg);
+ write(f,' ');
+ writeln(f,Points);
+ writeln(f,ec);
+ for var i:integer := 0 to SMap.RowCount -1 do begin
+   for var j:integer := 0 to SMap.ColCount -1 do begin
+    if EMap[j,i] <> Nil then begin
+      write(f,j);
+      write(f,' ');
+      writeln(f,i);
+      writeln(f,EMap[j,i].kind);
+    end;
+   end;
+ end;
+ for var i:integer := 0 to Inventory.ItemListBox.Items.Count - 1 do
+  if Inventory.ItemListBox.Items[i] = 'Амулет' then write(f,'0 ')
+   else if Inventory.ItemListBox.Items[i] = 'Меч' then write(f,'1 ')
+    else if Inventory.ItemListBox.Items[i] = 'Зелье' then write(f,'2 ');
+ ShowMessage('Ваша игра была успешно сохранена как Save_'+inttostr(fk)+'.txt');
+ CloseFile(f);
+end;
+
+procedure TGame.N4Click(Sender: TObject);
+//Открывает файл справки
+begin
+ ShellExecute(0,PChar('Open'),PChar(ExtractFilePath(Application.Exename)+'ProjectHelp.chm'),Nil,Nil,SW_SHOW);
+end;
+
+procedure TStringGrid.Loaded;
+var
+  cmp: TComponent;
+//Метод класса StringGrid, привязывающий список картинок к таблице
+begin
+  inherited;
+  cmp := Owner.FindComponent('SpriteImageList');
+  if Assigned(cmp) and (cmp is TImageList) then
+    FImageList := TImageList(cmp);
+end;
+
+procedure TStringGrid.DrawCell(ACol, ARow: Integer; ARect: TRect; AState: TGridDrawState);
+var
+  s: string;
+  bmp: TBitmap;
+  xOff: Integer;
+  YOff: Integer;
+//Метод класса StringGrid, который читает содержимое ячейки таблицы карты, таблицы противника и положение игрока и рисует соответствующую картинку на таблице
+begin
+  inherited;
+  if not Assigned(FImageList) then  //Проверяет, привязан ли список картинок к таблице
+    Exit;
+  s := Cells[ACol, ARow];  //Читает ячейки таблицы
+  Canvas.FillRect(ARect);
+  bmp := TBitmap.Create;   //Создает переменную картинки
+  try
+    //Проверяет значение ячейки карты, значение ячейки таблицы противников и положение игрока и выбирает соответствующую картинку
+    if s='0' then FImageList.GetBitmap(0, bmp)
+    else if s='1' then FImageList.GetBitmap(1, bmp)
+    else if s='2' then FImageList.GetBitmap(6, bmp)
+    else if s='3' then FImageList.GetBitmap(7, bmp);
+    if (p.PosX = ACol) and (p.PosY = ARow) then
+      FImageList.GetBitmap(2, bmp)
+    else if EMap[ACol,ARow] <> Nil then
+      if EMap[ACol,ARow].kind = 'snake' then FImageList.GetBitmap(3, bmp)
+      else if EMap[ACol,ARow].kind = 'ork' then FImageList.GetBitmap(4, bmp)
+      else if EMap[ACol,ARow].kind = 'shroom' then FImageList.GetBitmap(5, bmp);
+    //Определяет положение нужное картнки и рисует её
+    xOff := ARect.Left + ((ARect.Right - ARect.Left) - bmp.Width) div 2;
+    YOff := ARect.Top + ((ARect.Bottom - ARect.Top) - bmp.Height) div 2;
+    Canvas.Draw(xOff, YOff, bmp);
+  finally
+    FreeAndNil(bmp);  //Освобождает переменную картинки, даже если при выполнении try что-то пошло не так
+  end;
+end;
+
+procedure TStringGrid.KeyPress(var Key: Char);
+//Метод класса StringGrid, который вызывает процедуру Move и передает ей
+begin
+//Ячейкам, на которых находится игрок до и после перемещения заново задаются значения клетки пути для дого, что бы вызвать процедуру DrawCell
+ Self.Cells[p.PosX,p.PosY] := '1';
+ if (Key = 'a') or (Key = 'A') or (Key = 'Ф') or (Key = 'ф') then p.Move(-1,0,Self);
+ if (Key = 'w') or (Key = 'W') or (Key = 'Ц') or (Key = 'ц') then p.Move(0,-1,Self);
+ if (Key = 'd') or (Key = 'D') or (Key = 'В') or (Key = 'в') then p.Move(1,0,Self);
+ if (Key = 's') or (Key = 'S') or (Key = 'Ы') or (Key = 'ы') then p.Move(0,1,Self);
+ Self.Cells[p.PosX,p.PosY] := '1';
+end;
+
+end.

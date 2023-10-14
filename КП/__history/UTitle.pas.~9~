@@ -1,0 +1,40 @@
+unit UTitle;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Imaging.pngimage;
+
+type
+  TTitle = class(TForm)
+    Image1: TImage;
+    Timer1: TTimer;
+    procedure Timer1Timer(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Title: TTitle;
+  x: byte;
+
+implementation
+
+{$R *.dfm}
+
+uses UStart;
+
+
+procedure TTitle.Timer1Timer(Sender: TObject);
+begin
+ if Title.AlphaBlendValue = 255 then x := x+1;
+ if x = 0 then Title.AlphaBlendValue:= Title.AlphaBlendValue + 5
+ else if x = 100 then Title.AlphaBlendValue:= Title.AlphaBlendValue - 5;
+ if Title.AlphaBlendValue = 0 then begin Start.Show;
+                                         Title.Hide; end;
+end;
+
+end.

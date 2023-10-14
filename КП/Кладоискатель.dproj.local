@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.619,C:\Проекты Delphi\КП\Unit1.dfm=C:\Проекты Delphi\КП\UInv.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.590,=C:\Проекты Delphi\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.743,=C:\Проекты Delphi\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.793,C:\Проекты Delphi\КП\Unit1.dfm=C:\Проекты Delphi\КП\UOrkB.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.310,=C:\Users\Даниил\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.879,C:\Проекты Delphi\КП\UStart.dfm=C:\Проекты Delphi\КП\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.991,C:\Проекты Delphi\КП\Unit1.dfm=C:\Проекты Delphi\КП\UGame.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.270,=C:\Проекты Delphi\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.373,C:\Users\Даниил\Desktop\КП\КП\U.pas=C:\Users\Даниил\Desktop\КП\КП\UStats.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.453,C:\Users\Даниил\Desktop\КП\КП\UTitle.dfm=C:\Users\Даниил\Desktop\КП\КП\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.443,C:\Проекты Delphi\КП\Project1.dproj=C:\Проекты Delphi\КП\Кладоискатель.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.991,C:\Проекты Delphi\КП\Unit1.pas=C:\Проекты Delphi\КП\UGame.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.071,=C:\Проекты Delphi\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.793,C:\Проекты Delphi\КП\Unit1.pas=C:\Проекты Delphi\КП\UOrkB.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.619,C:\Проекты Delphi\КП\Unit1.pas=C:\Проекты Delphi\КП\UInv.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.354,=C:\Users\Даниил\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.991,C:\Users\Даниил\Desktop\КП\КП\UShroomB.pas=C:\Users\Даниил\Desktop\КП\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.668,C:\Проекты Delphi\КП\USnakeB.dfm=C:\Проекты Delphi\КП\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.806,C:\Users\Даниил\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Проекты Delphi\КП\Project1.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.474,=C:\Users\Даниил\Desktop\КП\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.169,C:\Users\Даниил\Desktop\КП\КП\Unit1.pas=C:\Users\Даниил\Desktop\КП\КП\U.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.668,=C:\Users\Даниил\Desktop\КП\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.347,=C:\Users\Даниил\Desktop\КП\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.668,C:\Проекты Delphi\КП\USnakeB.pas=C:\Проекты Delphi\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.879,C:\Проекты Delphi\КП\UStart.pas=C:\Проекты Delphi\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.915,C:\Users\Даниил\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Проекты Delphi\КП\Unit1.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.915,C:\Users\Даниил\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Проекты Delphi\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.453,C:\Users\Даниил\Desktop\КП\КП\UTitle.pas=C:\Users\Даниил\Desktop\КП\КП\Unit1.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.169,C:\Users\Даниил\Desktop\КП\КП\Unit1.dfm=C:\Users\Даниил\Desktop\КП\КП\U.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.373,C:\Users\Даниил\Desktop\КП\КП\U.dfm=C:\Users\Даниил\Desktop\КП\КП\UStats.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.991,C:\Users\Даниил\Desktop\КП\КП\UShroomB.dfm=C:\Users\Даниил\Desktop\КП\КП\Unit1.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

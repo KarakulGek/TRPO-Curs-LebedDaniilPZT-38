@@ -1,0 +1,20 @@
+﻿program Кладоискатель;
+
+uses
+  Vcl.Forms,
+  UGame in 'UGame.pas' {Game},
+  UInv in 'UInv.pas' {Inventory},
+  UStart in 'UStart.pas' {Start},
+  USnakeB in 'USnakeB.pas' {SnakeBattle},
+  UOrkB in 'UOrkB.pas' {OrkBattle},
+  UShroomB in 'UShroomB.pas' {ShroomBattle},
+  UTitle in 'UTitle.pas' {Title};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.CreateForm(TTitle, Title);
+  Application.CreateForm(TStart, Start);
+  Application.Run;
+end.
